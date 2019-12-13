@@ -9,13 +9,6 @@
 
 using namespace std;
 
-class Coord {
-public:
-    Coord(int x, int y) : x(x), y(y) {}
-    int x;
-    int y;
-};
-
 class Segment {
 public:
     Segment(int min, int max, int pos) : min(min), max(max), pos(pos) {}
@@ -24,20 +17,31 @@ public:
     int pos;
 };
 
-struct Wire {
-    list<Segment*> h_segs;
-    list<Segment*> v_segs;
+class Coord {
+public:
+    Coord(int x, int y) : x(x), y(y) {}
+    int x;
+    int y;
 };
 
 bool compare_segs (const Segment* first, const Segment* second);
+
+
+struct segcomp {
+    bool operator() (const Segment* l, const Segment* r) const {
+	return compare_segs(l, r);
+    }
+};
+
+struct Wire {
+    set<Segment*, segcomp> h_segs;
+    set<Segment*, segcomp> v_segs;
+};
 Wire parse_wire(string wire_txt);
 
 int main() {
     ios_base::sync_with_stdio(false);    
     cin.tie(NULL);
-
-    list<Segment*> h_segs;
-    list<Segment*> v_segs;
     
     string wire1_txt;
     cin >> wire1_txt; 
@@ -48,7 +52,7 @@ int main() {
     Wire wire1 = parse_wire(wire1_txt);
     Wire wire2 = parse_wire(wire2_txt);
     
-    // wire1.v_segs.front()->pos
+    cout << (*(wire1.v_segs.begin()))->pos << endl;
 }
 
 bool compare_segs (const Segment* first, const Segment* second) {
@@ -57,8 +61,8 @@ bool compare_segs (const Segment* first, const Segment* second) {
 }
 
 Wire parse_wire(string wire_txt) {
-    list<Segment*> h_segs;
-    list<Segment*> v_segs;
+    set<Segment*, segcomp> h_segs;
+    set<Segment*, segcomp> v_segs;
 
     Coord* last_coord = new Coord(0, 0);
     bool first = true;
@@ -72,16 +76,16 @@ Wire parse_wire(string wire_txt) {
 	    int dist = atoi(dist_str.c_str());
 	    if(dir == 'U') {
 		new_coord = new Coord(last_coord->x, last_coord->y+dist);
-		v_segs.push_back(new Segment(last_coord->y, new_coord->y, new_coord->x));
+		v_segs.insert(new Segment(last_coord->y, new_coord->y, new_coord->x));
 	    } else if(dir == 'D') {
 		new_coord = new Coord(last_coord->x, last_coord->y-dist);
-		v_segs.push_back(new Segment(new_coord->y, last_coord->y, new_coord->x));
+		v_segs.insert(new Segment(new_coord->y, last_coord->y, new_coord->x));
 	    } else if(dir == 'L') {
 		new_coord = new Coord(last_coord->x-dist, last_coord->y);
-		h_segs.push_back(new Segment(new_coord->x, last_coord->x, new_coord->y));
+		h_segs.insert(new Segment(new_coord->x, last_coord->x, new_coord->y));
 	    } else if(dir == 'R') {
 		new_coord = new Coord(last_coord->x+dist, last_coord->y);
-		h_segs.push_back(new Segment(last_coord->x, new_coord->x, new_coord->y));
+		h_segs.insert(new Segment(last_coord->x, new_coord->x, new_coord->y));
 	    }
 	    delete last_coord;
 	    last_coord = new_coord;
@@ -93,9 +97,6 @@ Wire parse_wire(string wire_txt) {
 	    dist_str += c;
 	}
     }
-
-    h_segs.sort(compare_segs);
-    v_segs.sort(compare_segs);
 
     delete last_coord;
 
