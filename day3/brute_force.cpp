@@ -22,6 +22,8 @@ public:
     int max;
     int pos;
 };
+bool compare_segs (const Segment* first, const Segment* second);
+
 int main() {
     ios_base::sync_with_stdio(false);    
     cin.tie(NULL);
@@ -65,7 +67,9 @@ int main() {
 	    dist_str += c;
 	}
     }
-    cout << "h: " << endl;    
+    h_segs.sort(compare_segs);
+    v_segs.sort(compare_segs);
+    cout << "h: " << endl;
     for (auto it = h_segs.begin(); it != h_segs.end(); ++it) {
 	cout << (*it)->min << " " << (*it)->max << " " << (*it)->pos << endl;
     }
@@ -75,4 +79,9 @@ int main() {
 	cout << (*it)->min << " " << (*it)->max << " " << (*it)->pos << endl;
     }
     delete last_coord;
+}
+
+bool compare_segs (const Segment* first, const Segment* second) {
+    if (first->pos < second->pos) return true;
+    else return false;
 }
