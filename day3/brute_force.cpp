@@ -26,43 +26,53 @@ int main() {
     ios_base::sync_with_stdio(false);    
     cin.tie(NULL);
 
-    list<Segment> h_segs;
-    list<Segment> v_segs;
+    list<Segment*> h_segs;
+    list<Segment*> v_segs;
     
-    char* wire1;
+    string wire1;
     cin >> wire1; 
 
     Coord* last_coord = new Coord(0, 0);
-
-    char* token;
-    const char delim = ',';
-    token = strtok(wire1, delim);
-    while (token != NULL) {
-	char dir = token[0];
-	int distance = atoi(token + 1);
-
-	Coord* new_coord;
-
-	if(dir == 'U') {
-	    v_segs.push_back(Segment(last_coord->y, last_coord->y+distance, last_coord->x));
-	    new_coord = new Coord(last_coord->x, last_coord->y+distance);
-	} else if(dir == 'D') {
-	    v_segs.push_back(Segment(last_coord->y-distance, last_coord->y, last_coord->x));
-	    new_coord = new Coord(last_coord->x, last_coord->y-distance);
-	} else if(dir == 'L') {
-	    h_segs.push_back(Segment(last_coord->x-distance, last_coord->x, last_coord->y));
-	    new_coord = new Coord(last_coord->x-distance, last_coord->y);
-	} else if(dir == 'R') {
-	    h_segs.push_back(Segment(last_coord->x, last_coord->x+distance, last_coord->y));
-	    new_coord = new Coord(last_coord->x+distance, last_coord->y);
+    bool first = true;
+    char dir;
+    string dist_str = "";
+    for (auto it = wire1.begin(); it <= wire1.end(); ++it) {
+	char c = *it;
+	if (c == ',' || it == wire1.end()) {
+	    first = true;
+	    Coord* new_coord;
+	    int dist = atoi(dist_str.c_str());
+	    if(dir == 'U') {
+		new_coord = new Coord(last_coord->x, last_coord->y+dist);
+		v_segs.push_back(new Segment(last_coord->y, new_coord->y, new_coord->x));
+	    } else if(dir == 'D') {
+		new_coord = new Coord(last_coord->x, last_coord->y-dist);
+		v_segs.push_back(new Segment(new_coord->y, last_coord->y, new_coord->x));
+	    } else if(dir == 'L') {
+		new_coord = new Coord(last_coord->x-dist, last_coord->y);
+		h_segs.push_back(new Segment(new_coord->x, last_coord->x, new_coord->y));
+	    } else if(dir == 'R') {
+		new_coord = new Coord(last_coord->x+dist, last_coord->y);
+		h_segs.push_back(new Segment(last_coord->x, new_coord->x, new_coord->y));
+	    }
+	    delete last_coord;
+	    last_coord = new_coord;
+	    dist_str = "";
+	} else if(first) {
+	    dir = c;
+	    first = false;
+	} else {
+	    dist_str += c;
 	}
-
-	delete last_coord;
-	last_coord = new_coord;
-	 
-	token = strtok(NULL, delim);
     }
-    for(std::list<Segment>::iterator it=h_segs.begin(); it != h_segs.end(); ++it) {
-	cout << it->min << " " << it->max << " " << it->pos << endl;
+    cout << "h: " << endl;    
+    for (auto it = h_segs.begin(); it != h_segs.end(); ++it) {
+	cout << (*it)->min << " " << (*it)->max << " " << (*it)->pos << endl;
     }
+    
+    cout << "v: " << endl;    
+    for (auto it = v_segs.begin(); it != v_segs.end(); ++it) {
+	cout << (*it)->min << " " << (*it)->max << " " << (*it)->pos << endl;
+    }
+    delete last_coord;
 }
