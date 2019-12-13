@@ -8,6 +8,7 @@
 #include <iostream>
 
 using namespace std;
+
 class Coord {
 public:
     Coord(int x, int y) : x(x), y(y) {}
@@ -22,7 +23,14 @@ public:
     int max;
     int pos;
 };
+
+struct Wire {
+    list<Segment*> h_segs;
+    list<Segment*> v_segs;
+};
+
 bool compare_segs (const Segment* first, const Segment* second);
+Wire parse_wire(string wire_txt);
 
 int main() {
     ios_base::sync_with_stdio(false);    
@@ -31,16 +39,34 @@ int main() {
     list<Segment*> h_segs;
     list<Segment*> v_segs;
     
-    string wire1;
-    cin >> wire1; 
+    string wire1_txt;
+    cin >> wire1_txt; 
+
+    string wire2_txt;
+    cin >> wire2_txt; 
+
+    Wire wire1 = parse_wire(wire1_txt);
+    Wire wire2 = parse_wire(wire2_txt);
+    
+    // wire1.v_segs.front()->pos
+}
+
+bool compare_segs (const Segment* first, const Segment* second) {
+    if (first->pos < second->pos) return true;
+    else return false;
+}
+
+Wire parse_wire(string wire_txt) {
+    list<Segment*> h_segs;
+    list<Segment*> v_segs;
 
     Coord* last_coord = new Coord(0, 0);
     bool first = true;
     char dir;
     string dist_str = "";
-    for (auto it = wire1.begin(); it <= wire1.end(); ++it) {
+    for (auto it = wire_txt.begin(); it <= wire_txt.end(); ++it) {
 	char c = *it;
-	if (c == ',' || it == wire1.end()) {
+	if (c == ',' || it == wire_txt.end()) {
 	    first = true;
 	    Coord* new_coord;
 	    int dist = atoi(dist_str.c_str());
@@ -67,21 +93,14 @@ int main() {
 	    dist_str += c;
 	}
     }
+
     h_segs.sort(compare_segs);
     v_segs.sort(compare_segs);
-    cout << "h: " << endl;
-    for (auto it = h_segs.begin(); it != h_segs.end(); ++it) {
-	cout << (*it)->min << " " << (*it)->max << " " << (*it)->pos << endl;
-    }
-    
-    cout << "v: " << endl;    
-    for (auto it = v_segs.begin(); it != v_segs.end(); ++it) {
-	cout << (*it)->min << " " << (*it)->max << " " << (*it)->pos << endl;
-    }
-    delete last_coord;
-}
 
-bool compare_segs (const Segment* first, const Segment* second) {
-    if (first->pos < second->pos) return true;
-    else return false;
+    delete last_coord;
+
+    return Wire {
+	h_segs,
+	v_segs
+    };
 }
