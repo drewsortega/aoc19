@@ -1,4 +1,5 @@
 #include <iostream>
+#include <math.h>
 #include <vector>
 #include <algorithm>
 #include <bits/stdc++.h>
@@ -51,13 +52,57 @@ int main() {
 
     Wire wire1 = parse_wire(wire1_txt);
     Wire wire2 = parse_wire(wire2_txt);
-    
-    cout << (*(wire1.v_segs.begin()))->pos << endl;
+
+    list<Coord> intersections;
+
+    int best = 100000000;
+     
+    for(auto it1 = wire1.v_segs.begin(); it1 != wire1.v_segs.end(); ++it1) {
+
+	Segment* s1 = *it1;
+	cout << s1->min << " " << s1->max << " " << s1->pos << endl;
+	for(auto it2 = wire2.h_segs.begin(); it2 != wire2.h_segs.end(); ++it2) {
+	    Segment* s2 = *it2;
+	    if( (
+		    s1->pos >= s2->min 
+		    && s1->pos <= s2->max 
+		    && s2->pos >= s1->min
+		    && s2->pos <= s1->max )) {
+		int d = abs(s1->pos) + abs(s2->pos);
+		if(d < best) {
+		    best = d;
+		}
+	    }
+	}
+    }
+    for(auto it1 = wire1.h_segs.begin(); it1 != wire1.h_segs.end(); ++it1) {
+	Segment* s1 = *it1;
+	cout << s1->min << " " << s1->max << " " << s1->pos << endl;
+	for(auto it2 = wire2.v_segs.begin(); it2 != wire2.v_segs.end(); ++it2) {
+	    Segment* s2 = *it2;
+	    if(s1->pos >= s2->min 
+		    && s1->pos <= s2->max 
+		    && s2->pos >= s1->min
+		    && s2->pos <= s1->max ) {
+		int d = abs(s1->pos) + abs(s2->pos);
+		if(d < best) {
+		    best = d;
+		}
+	    }
+	}
+    }
+
+    cout << best << endl;
+
 }
 
 bool compare_segs (const Segment* first, const Segment* second) {
-    if (first->pos < second->pos) return true;
-    else return false;
+    if (first->pos == second->pos) {
+	if(first->min == second->min) {
+	    if (first->max < second->max) return true;
+	} else if (first->pos < second->pos) return true;
+    } else if (first->pos < second->pos) return true;
+    return false;
 }
 
 Wire parse_wire(string wire_txt) {
