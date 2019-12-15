@@ -1,0 +1,136 @@
+#!/sbin/python3
+import sys
+
+
+def get_val(pc_addr, mode, prog):
+    if(mode == 0):
+        addr = int(prog[pc_addr])
+        if(addr < len(prog)):
+            return int(prog[addr])
+        return 0
+    elif(mode == 1):
+        return int(prog[pc_addr])
+    else:
+        sys.exit('bad mode')
+
+def parse_intcode(prog):
+    size = len(prog)
+    # set program counter to 0
+    pc = 0
+
+    # loop until complete
+    running = True
+    while(running):
+        # CBADE
+        inst = prog[pc]
+        # get DE
+        # get opcode and increase program counter
+
+        opcode = inst % 100 
+
+        # update instruction, so we can get ABC.
+        inst = int(inst / 100)
+
+        A_mode = inst % 10
+        inst = int(inst / 10)
+            
+        B_mode = inst % 10
+        inst = int(inst / 10)
+
+        C_mode = inst % 10
+
+        # print("PC: {}, inst: {}, opcode: {}, A_mode: {}, B_mode: {}, C_mode: {}".format(pc, prog[pc], opcode, A_mode, B_mode, C_mode))
+        A_val = 0
+        B_val = 0
+        C_val = 0
+        if(pc + 1 < size):
+            A_val = get_val(pc+1, A_mode, prog)
+            if(pc + 2 < size - 1):
+                B_val = get_val(pc+2, B_mode, prog)
+                if(pc + 3 < size - 1):
+                    C_val = get_val(pc+3, C_mode, prog)
+            
+        
+        # addition
+        if opcode == 1:
+            # store result
+            prog[prog[pc+3]]=A_val + B_val
+            pc += 4
+
+        # multiplication
+        elif opcode == 2:
+            # store result
+            prog[prog[pc+3]]=A_val * B_val
+            pc += 4
+        
+        # store input
+        elif opcode == 3:
+            prog[prog[pc+1]] = input()
+            pc += 2
+        
+        # print output
+        elif opcode == 4:
+            print(A_val)
+            pc += 2
+
+        # jump if true
+        elif opcode == 5:
+            if (A_val != 0):
+                pc = B_val
+            else:
+                pc += 3
+
+        # jump if false
+        elif opcode == 6:
+            if (A_val == 0):
+                pc = B_val
+            else:
+                pc += 3
+
+        # less than
+        elif opcode == 7:
+            val = 0
+            if (A_val < B_val):
+                val = 1
+            prog[prog[pc+3]] = val
+            pc += 4
+
+        # eq to
+        elif opcode == 8:
+            val = 0
+            if (A_val == B_val):
+                val = 1
+            prog[prog[pc+3]] = val
+            pc += 4
+
+
+        # end of execution
+        elif opcode == 99:
+            running = False
+
+        # invalid opcode
+        else:
+            sys.exit('received invalid opcode')
+    return prog
+
+def main():
+    if len(sys.argv) != 2:
+        sys.exit('provide .int filename')
+
+    if not sys.argv[1].endswith('.int'):
+        sys.exit('please provide .int filetype')
+
+    prog = list()
+
+    try:
+        with open(sys.argv[1], 'r') as f:
+            for line in f:
+                prog = prog + [int(x) for x in line.split(',')]
+        parse_intcode(prog)
+    except FileNotFoundError:
+        sys.exit('could not find file {}', sys.argv[1])
+
+
+if __name__ == "__main__":
+    main()
+
