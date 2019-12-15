@@ -2,7 +2,7 @@ import sys
 
 def get_val(pc_addr, mode, prog):
     if(mode == 0):
-        addr = prog[pc_addr]
+        addr = int(prog[pc_addr])
         if(addr < len(prog)):
             return int(prog[addr])
         return 0
@@ -37,7 +37,7 @@ def parse_intcode(prog):
 
         C_mode = inst % 10
 
-        print("PC: {}, inst: {}, opcode: {}, A_mode: {}, B_mode: {}, C_mode: {}".format(pc, prog[pc], opcode, A_mode, B_mode, C_mode))
+        # print("PC: {}, inst: {}, opcode: {}, A_mode: {}, B_mode: {}, C_mode: {}".format(pc, prog[pc], opcode, A_mode, B_mode, C_mode))
         A_val = 0
         B_val = 0
         C_val = 0
@@ -60,14 +60,47 @@ def parse_intcode(prog):
             # store result
             prog[prog[pc+3]]=A_val * B_val
             pc += 4
-
+        
+        # store input
         elif opcode == 3:
             prog[prog[pc+1]] = input()
             pc += 2
         
+        # print output
         elif opcode == 4:
             print(A_val)
             pc += 2
+
+        # jump if true
+        elif opcode == 5:
+            if (A_val != 0):
+                pc = B_val
+            else:
+                pc += 3
+
+        # jump if false
+        elif opcode == 6:
+            if (A_val == 0):
+                pc = B_val
+            else:
+                pc += 3
+
+        # less than
+        elif opcode == 7:
+            val = 0
+            if (A_val < B_val):
+                val = 1
+            prog[prog[pc+3]] = val
+            pc += 4
+
+        # eq to
+        elif opcode == 8:
+            val = 0
+            if (A_val == B_val):
+                val = 1
+            prog[prog[pc+3]] = val
+            pc += 4
+
 
         # end of execution
         elif opcode == 99:
@@ -87,7 +120,7 @@ def init(prog, noun, verb):
 
 def main():
     prog = list()
-    prog = prog + [int(x) for x in input().split(",")] + [10, 10, 10, 10, 10]
+    prog = prog + [int(x) for x in input().split(",")]
     parse_intcode(prog)
 
 if __name__ == "__main__":
