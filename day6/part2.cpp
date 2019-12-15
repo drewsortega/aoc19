@@ -1,13 +1,13 @@
 #include <string>
 #include <map>
-#include <set>
+#include <stack>
 #include <iostream>
 
 using namespace std;
 
 pair<string, string> get_pair(string);
 int count_orbits(map<string, string>&, map<string, int>&, string);
-set<string>* trace(map<string, string>&, string);
+stack<string>* trace(map<string, string>&, string);
 
 int main() {
 
@@ -25,18 +25,25 @@ int main() {
 	total_count += count_orbits(orbits, counts, pair.first);
     }
 
-    set<string>* you_trace = trace(orbits, "YOU");
-    set<string>* san_trace = trace(orbits, "SAN");
+    stack<string>* you_trace = trace(orbits, "YOU");
+    stack<string>* san_trace = trace(orbits, "SAN");
 
     int jumps = 0;
-    for(auto it = you_trace->begin(); it != you_trace->end(); ++it) {
-	auto path_intersection = san_trace->find(*it);
-	if(path_intersection != san_trace->end()) {
-	    jumps = counts.at("YOU") + counts.at("SAN") - 2*counts.at(*path_intersection) - 2;
-	}
+    string you = "COM";
+    string san = "COM";
+    while(you == san) {
+	you = you_trace->top();
+	san = san_trace->top();
+	you_trace->pop();
+	san_trace->pop();
     }
 
-    cout << total_count << endl;
+    jumps = you_trace->size() + san_trace->size() + 2;
+
+    cout << "CHECKSUM: " << total_count << endl;
+    cout << "JUMPS: " << jumps << endl;
+    return 0;
+
 }
 
 pair<string, string> get_pair(string input) {
@@ -57,11 +64,11 @@ pair<string, string> get_pair(string input) {
     return pair<string, string>(outer, inner);
 }
 
-set<string>* trace(map<string, string>& orbits, string planet) {
-    set<string>* path = new set<string>();
+stack<string>* trace(map<string, string>& orbits, string planet) {
+    stack<string>* path = new stack<string>();
     while(planet != "COM") {
 	planet = orbits.at(planet);
-	path->insert(planet);
+	path->push(planet);
     }
     return path;
 }
