@@ -1,26 +1,21 @@
-#include <bits/stdc++.h>
 #include <string>
+#include <map>
+#include <iostream>
 
 using namespace std;
 
-void get_pair(string, string*, string*);
+pair<string, string> get_pair(string);
 int count_orbits(map<string, string>&, map<string, int>&, string);
 
 int main() {
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
 
     string line;
 
     map<string, string> orbits;
     map<string, int> counts;
-    string* inner;
-    string* outer;
     while(getline(cin, line)) {
-	get_pair(line, inner, outer);
-	orbits.emplace(*outer, *inner);
-	delete inner;
-	delete outer;
+	pair<string, string> p = get_pair(line);
+	orbits.insert(p);
     }
 
     int total_count = 0;
@@ -31,17 +26,22 @@ int main() {
     cout << total_count << endl;
 }
 
-void get_pair(string input, string* inner, string* outer) {
+pair<string, string> get_pair(string input) {
     string text = "";
+    string inner;
+    string outer;
     for(auto it = input.begin(); it <= input.end(); ++it) {
 	if (*it == ')') {
-	    inner = new string(text);
+	    inner = text;
+	    text = "";
 	} else if(it == input.end()) {
-	    outer = new string(text);
+	    outer = text;
+	    text = "";
 	} else {
 	    text += *it;
 	}
     }
+    return pair<string, string>(outer, inner);
 }
 
 int count_orbits(map<string, string>& orbits, map<string, int>& counts, string planet) {
