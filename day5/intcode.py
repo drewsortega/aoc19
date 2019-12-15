@@ -2,9 +2,12 @@ import sys
 
 def get_val(pc_addr, mode, prog):
     if(mode == 0):
-        return prog[prog[pc_addr]]
+        addr = prog[pc_addr]
+        if(addr < len(prog)):
+            return int(prog[addr])
+        return 0
     elif(mode == 1):
-        return prog[pc_addr]
+        return int(prog[pc_addr])
     else:
         sys.exit('bad mode')
 
@@ -16,7 +19,7 @@ def parse_intcode(prog):
     # loop until complete
     running = True
     while(running):
-        # ABCDE
+        # CBADE
         inst = prog[pc]
         # get DE
         # get opcode and increase program counter
@@ -26,14 +29,15 @@ def parse_intcode(prog):
         # update instruction, so we can get ABC.
         inst = int(inst / 100)
 
-        C_mode = inst % 10
+        A_mode = inst % 10
         inst = int(inst / 10)
             
         B_mode = inst % 10
         inst = int(inst / 10)
 
-        A_mode = inst % 10
+        C_mode = inst % 10
 
+        print("PC: {}, inst: {}, opcode: {}, A_mode: {}, B_mode: {}, C_mode: {}".format(pc, prog[pc], opcode, A_mode, B_mode, C_mode))
         A_val = 0
         B_val = 0
         C_val = 0
@@ -83,7 +87,7 @@ def init(prog, noun, verb):
 
 def main():
     prog = list()
-    prog = prog + [int(x) for x in input().split(",")]
+    prog = prog + [int(x) for x in input().split(",")] + [10, 10, 10, 10, 10]
     parse_intcode(prog)
 
 if __name__ == "__main__":
